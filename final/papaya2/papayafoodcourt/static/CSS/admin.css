@@ -1,0 +1,56 @@
+.auth-form {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 4em;
+    width: 40%;
+}
+
+.btn-papaya {
+    background-color: #aae509;
+    display: block;
+    color: white;
+    margin: auto;
+    margin-top: 0.5em;
+    border-radius: 0.25em;
+}
+
+.btn-anchor {
+    width: 50%;
+}
+
+.inputs {
+    margin-top: 1em;
+}
+
+#manage-user-table {
+    width: 95%;
+    margin: auto
+}
+
+.manage-user-btns {
+    color: #ffffff;
+    background-color: #7fac07;
+}
+
+.manage-user-btns:hover {
+    color: #000000;
+}
+
+@media screen and (max-width: 500px) {
+    .auth-form {
+        width: 95%;
+    }
+
+    .btn-papaya {
+        width: 100%;
+    }
+
+    #create-user-btn {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.policy{
+    width: 90%;
+    margin: auto
+}
