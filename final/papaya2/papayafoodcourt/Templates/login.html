@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+{% if current_user.is_authenticated %}
+
+    {% if current_user.get_account_type() == "Staff" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/staff.css') }}">
+    {% elif current_user.get_account_type() == "Admin" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+    {% elif current_user.get_account_type() == "Customer" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+    {% endif %}
+{% else %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+{% endif %}
+
+{% endblock %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<br>
+<h2 class="text-center">Welcome Back!</h2>
+<p class="text-center">Order and enjoy delicious food in the comfort of your home!</p>
+    <form action="" method="post">
+        {{ form.csrf_token }}
+        <div class="auth-form">
+            <div class="form-group row">
+                {{ form.login_email.label(class_="col-sm-2 col-form-label")}}
+                <div class="col-sm-10">
+                    {{ form.login_email(class_="form-control") }}
+                </div>
+            </div>
+            <div class="form-group row inputs">
+                {{ form.login_password.label(class_="col-sm-2 col-form-label")}}
+                <div class="col-sm-10">
+                    {{ form.login_password(class_="form-control") }}
+                    </small><a href="/reset-password" class=""><small>Reset Password</small></a>
+                </div>
+            </div>
+            <br>
+            <center>{{ recaptcha }}</center>
+            <button type="submit" class="btn btn-papaya">Login</button>
+            <p><small>By clicking "Login", you hereby agree to and accept our terms of use and privacy policy</small></p>
+
+            <h4 class="text-center" style="margin-top: 5em;">Don't have an account? Sign up now!</h4>
+            <br>
+            <a href="/register" class="btn btn-papaya btn-anchor">Sign Up</a>
+            <br>
+        </div>
+    </form>
+<br>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

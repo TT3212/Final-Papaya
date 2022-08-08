@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Manage Logs{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+{% endblock %}
+{% block content %}
+<div class="policy">
+        <h4>Policies</h4>
+        <ul>
+            <li>Continuous Monitoring of: </li>
+            <ul>
+                <li><a href="{{ url_for('redirecting_source', website = 'CVE')}}" >CVE</a></li>
+                <li><a href="{{ url_for('redirecting_source', website = 'NVD')}}">NVD</a></li>
+            </ul>
+            <li>Continuous Inventory of Components</li>
+            <li>Track Patch Availability</li>
+            <li>Apply Patches Quickly</li>
+        </ul>
+
+    </div>
+{%endblock%}

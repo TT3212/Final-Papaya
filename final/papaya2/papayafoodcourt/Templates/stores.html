@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+Create Store
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/stores.css')}}">
+{% endblock %}
+
+{% block content%}
+<hr>
+<div class="container">
+  <h2>Manage Stores and Products</h2>
+  <div class="row">
+    <div class="d-flex flex-row">
+      <div class="p-2">
+        <a href="/create-store" class="btn create-btn">Create Store</a>
+      </div>
+      <div class="p-2">
+        <a href="/create-product" class="btn create-btn">Create Product</a>
+      </div>
+    </div>
+    {% for store in stores_list %}
+    <div class="col-sm-4">
+      <div class="card">
+        <img src="static/Images/Stores/{{ store.get_image() }}" alt="{{ store.get_name() }}" class="card-img-top">
+        <div class="card-body">
+          <h5 class="card-title">{{ store.get_name() }} Store</h5>
+          <p class="card-text">
+            <h6 style="text-decoration: underline;">Store Description:</h6>
+            <p>{{ store.get_description() }}</p>
+          </p>
+          <div class="row">
+            <div class="col-4">
+              <a href="/update-store/{{ store.get_name() }}" class="btn btn-warning" style="font-size: 0.915rem">Update Store</a>
+            </div>
+            <div class="col-4">
+              <!-- Button trigger modal -->
+              <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteStore-{{ store.get_name() }}" style="font-size: 0.9rem">
+                  <span>Delete Store</span>
+              </button>
+                    
+              <!-- Modal -->
+              <div class="modal fade" id="deleteStore-{{ store.get_name() }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Delete Store</h5>
+                      <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <span>Are you sure you want to delete "{{ store.get_name() }}"?</span>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                      <form action="{{ url_for('delete_store', store_name=store.get_name()) }}" method="post">
+                          <button type="submit" class="btn btn-danger">Delete</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <a href="/manage-stores/{{ store.get_name() }}" class="btn btn-info" style="font-size: 0.85rem">View Products</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+<hr>
+{% endblock %}

@@ -1,0 +1,58 @@
+{%extends "base.html"%}
+{%block title%}Papaya Food Court | Shopping Cart {%endblock%}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/cart.css') }}">
+{% endblock %}
+
+
+{%block content%}
+
+<div class="container">
+    <h1>Checkout</h1>
+    {% for order in cart %}
+    <div class="checkoutarea">
+        <div class="row">
+            <div class="col-sm-6">
+                <img src="/static/Images/Menus/{{ order.get_image() }}" alt="" class="img-fluid rounded">
+            </div>
+            <div class="col-sm-6">
+                <p>Order: {{order.get_name()}}</p>
+                <p>Quantity: {{order.get_quantity()}}</p>
+                <p>Price: ${{order.get_price()}}</p>
+                <p>Total: ${{order.get_total_price()}}</p>
+                <p>Description: {{order.description}}</p>
+                <p>Additional Request: {{ order.get_additional_request() }}</p>
+                <div class="button_area">
+                    <form action="{{url_for('delete_order', id=order.get_name())}}" method="POST">
+                        <input class="button" type="submit" value="Delete" class="btn btn-danger">
+                    </form>
+
+                    <form action="{{url_for('edit_order', id=order.get_name())}}" method="POST">
+                        <input class="button2"  type="submit" value="Edit" class="btn btn-danger">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <form action="/payment" method="POST">
+        <div class="row"> 
+            <div class="col-sm-6">
+                <p class="dmethod_string">Please choose one delivery method:</p>
+                <input class="delivery" name="deliverymethod" type="radio"  value="3.00" required checked="checked">
+                <label for="delivery">Standard Delivery: $3.00</label><br>
+                <input class="pickup" name="deliverymethod" type="radio" value="0.00" >
+                <label for="pickup">Self-Pick Up: $0.00</label>
+            </div>
+            <div class="col-sm-6" style="margin-top: auto; margin-bottom:auto">
+                <div class="d-flex justify-content-end">
+                    <input class="checkout_button" type="submit" onclick="location.href='/payment'" value="Checkout">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{%endblock%}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Manage Logs{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h4>We are current redirecting you to another website...</h4>
+    <a href="{{ website }}" class="btn btn-info">Confirm</a>
+    <a href="{{ url_for('home') }}" class="btn btn-info">Back To Home</a>
+</div>
+
+{% endblock%}

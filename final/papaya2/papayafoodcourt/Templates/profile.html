@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+{% if current_user.is_authenticated %}
+
+    {% if current_user.get_account_type() == "Staff" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/staff.css') }}">
+    {% elif current_user.get_account_type() == "Admin" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+    {% elif current_user.get_account_type() == "Customer" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+    {% endif %}
+{% else %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h4>My Profile</h4>
+    <h5>{{ current_user.get_username() }}</h5>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        <div class="row">
+            <div class="col-sm">
+                <div class="avatar-part">
+                {% if current_user.get_profile_picture() != None %}
+                    <img src="static/Images/Uploads/{{ current_user.get_profile_picture() }}" alt="profile picture" class="img-thumbnail">
+                {% else %}
+                    <img src="static/Images/default_profile_picture.jpg" alt="profile picture" width="256px" class="img-thumbnail">
+                {% endif%}
+
+                    <div class="form-group">
+                        {{ form.profile_picture.label() }}
+                        {{ form.profile_picture(class_="form-control", style="width: 80%") }}
+
+                        {% if form.profile_picture.errors %}
+                            {% for error in form.profile_picture.errors%}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+               </div>
+
+            </div>
+
+
+            <div class="col-sm">
+                <div class="form-group">
+                    {{ form.email_address.label }}
+                    {{ form.email_address(class_="form-control") }}
+                    {% for errors in form.email_address.errors %}
+                        <span class="text-danger">{{ errors }}</span>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.username.label }}
+                    {{ form.username(class_="form-control") }}
+                    {% for errors in form.username.errors %}
+                        <span class="text-danger">{{ errors }}</span>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.account_type.label }}
+                    {{ form.account_type(class_="form-control", placeholder=current_user.get_account_type(), readonly=true) }}
+                </div>
+                <div class="form-group">
+                    {{ form.first_name.label }}
+                    {{ form.first_name(class_="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.last_name.label }}
+                    {{ form.last_name(class_="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ form.description.label }}
+                    {{ form.description(class_="form-control", rows=3) }}
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <input type="submit" value="Update" class="btn btn-papaya">
+                    </div>
+                    <div class="col-sm-6">
+                        <a href="/reset-password/admin" class="btn-papaya btn btn-anchor">Reset Password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

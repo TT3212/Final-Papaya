@@ -1,0 +1,74 @@
+{%extends "base.html"%}
+{%block title%}Papaya Food Court | Payment {%endblock%}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/payment.css') }}">
+{% endblock %}
+
+{%block content%}
+<!--Code Start here!!-->
+<div class="container">
+    <div class="row">
+        <h1 id="shipping_header">SHIPPING DETAILS</h1>
+        <hr id="hr_1">
+        <div class="col-sm-6">
+            <form action="/checkout" method="POST">
+                <div class="row">
+                    <div class="col">
+                        <input type="text" name="FirstName" class="fname form-control" placeholder="* FIRST NAME" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="LastName" class="lname form-control"placeholder="*LAST NAME" required><br>
+                    </div>
+                </div>
+                <input type="text" name="StreetAddress"  class="saddress form-control" placeholder="*STREET ADDRESS" required><br>
+                <input type="text" name="BuildingBlock" class="apartment form-control" placeholder="*Building Blk" required><br>
+                <input type="text" name="City" class="citytown form-control" placeholder="*CITY/TOWN" required><br>
+                <input type="number" pattern=" [1-9]{6}" name="PostalCode" class="pcode form-control" min="0" placeholder="*POSTAL CODE" required><br>
+                <input type="number" name="PhoneNumber" class="pnumber form-control" min="0" placeholder="*PHONE NUMBER" required><br>
+                <input class="billinfo" type="checkbox" name="BillInfo" value="SAME" class="form-control">
+                <label for="billinfo">My billing information is the same as my shipping information</label><br>
+
+            <h1 id="shipping_header">CARD PAYMENT DETAILS</h1>
+            <hr id="hr_2">
+            <div class="CardInfo">
+                <input type="number" class="form-control" name="cardNo" placeholder="*CARD NUMBERS" required><br>
+                <input type="text" class="form-control" name="cardName" placeholder="*NAME ON CARD" required><br>
+                <div class="row">
+                    <div class="col">
+                        <input type="number" class="form-control" name="cardExpiryDate" placeholder="*MM/YY" required>
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="CVV" placeholder="CVV"><br>
+                    </div>
+                </div>
+                <P>*IF CARD INFORMATION IS INCORRECT, PAYMENT MODE WILL BE SWITCHED OVER TO CASH ON DELIVERY</P>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="ordersummary">
+            <!-- Retrieved db entry and display here        -->
+
+
+            <div class="chargeinfo">
+                <h2 class="order_header">ORDER SUMMARY</h2>
+                {% for order in cart %}
+                <p>Order: {{order.get_name()}} x {{order.get_quantity()}}   ${{order.get_total_price()}}  </p>
+
+                {% endfor %}
+                <hr id="hr_3">
+                <p>Subtotal: ${{CartObject.get_subtotal_purchase()}} </p>
+                <p>Delivery: ${{payment_info.get_delivery_fee()}} ({{payment_info.get_delivery_mode()}})</p>
+                <p>Goods and Services Tax (GST): ${{payment_info.get_gst()}}</p>
+                <p>Total: ${{CartObject.get_final_total()}}</p>
+
+
+                <input type="submit"  class="paynorder" value="PAY & ORDER">
+
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+{%endblock%}

@@ -1,0 +1,23 @@
+{%extends "base.html"%}
+{%block title%}Papaya Food Court | Specic Customer Order {%endblock%}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/orderHistory.css') }}">
+{% endblock %}
+
+
+{%block content%}
+<div class="container">
+    <h1 class="title">Customer Order</h1>
+    {% for order in orderList %}
+    <div class="orderHistoryBox2">
+        <p>Order Date & Time: {{order.get_dateTime()}}</p>
+
+        {%for item in order.Cart%}
+        <p>Order Item: {{item.get_name()}} x {{item.get_quantity()}}</p>
+        {%endfor%}
+    </div>
+    {%endfor%}
+</div>
+{%endblock%}

@@ -1,0 +1,58 @@
+{%extends "base.html"%}
+{%block title%}Papaya Food Court {%endblock%}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/specific_menu.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/stores.css')}}">
+{% endblock %}
+
+
+{%block content%}
+
+<div class="container">
+<h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/stores" class="breadcrumb-links">Stores</a></li>
+        <li class="breadcrumb-item"><a href="/stores/{{ store_name }}" class="breadcrumb-links">{{ store_name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ selected_product.get_name() }}</li>
+      </ol>
+    </nav>
+</h3>
+    <div class="row">
+        <div class="col-sm">
+            <img src="/static/Images/Menus/{{ selected_product.get_image() }}" alt="{{ selected_product.get_name() }}" class="img-thumbnail">
+        </div>
+        <div class="col-sm">
+            <div class="menu-details">
+                <div id="food-details">
+                    <h4 id="foodid" style="display:none;">{{selected_product.get_food_id()}}</h4>
+                    <h4 id="foodname">{{ selected_product.get_name() }}</h4>
+                    <h5>Price: ${{ selected_product.get_price() }}</h5>
+                    <h5>Description: {{ selected_product.get_description() }}</h5>
+                </div>
+                <div id="food-form">
+                    <form action="/addtocart" method="POST">
+                        <input type="hidden" name="store_id" value="{{store_id}}">
+                        <div class="form-group">
+                            <label for="additional_request">Additional Requests(If any)</label>
+                            <textarea class="form-control" name="additional_request" id="additional_request" rows="3"></textarea>
+                        </div>
+                        <div class="row" style="margin-top: 0.5rem;">
+                            <div class="col-4">
+                                <input type="number" id="quantity" class="form-control" name="quantity" min="1" max="12" value="1">
+                            </div>
+                            <div class="col-8">
+                                <input type="submit" class="submit_button" onclick="location.href='/addtocart'; " value="Order"/>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{%endblock%}

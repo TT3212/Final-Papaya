@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{%block title%}Papaya Food Court - Manage Orders{%endblock%}
+{% block head %}
+<link href="{{ url_for('static', filename='CSS/NavFooter.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='CSS/ordertracking.css') }}" rel="stylesheet"/>
+<!-- Refreshes every 30 seconds so staff do not have to manually reload to see orders -->
+<meta http-equiv="refresh" content="30">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Manage Orders</h1>
+    {% for orders in customer_orders_list %}
+    <div class="item-container">
+        <div class="row">
+            <div class="col-sm-8">
+                <h2>Order #{{ orders.get_order_id() }} by {{ orders.get_customer_name() }}</h4>
+            </div>
+            <div class="col-sm-4">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <form action="" method="post">
+                            <div class="input-group">
+                                {{ extend_time_form.csrf_token }}
+                                {{ extend_time_form.order_id(value=orders.get_order_id())}}
+                                {{ extend_time_form.time(class_="form-select") }}
+                                {{ extend_time_form.add_time(class_="btn btn-info")}}
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-4">
+                        <form action="" method="post">
+                            {{ done_cooking_form.csrf_token }}
+                            {{ done_cooking_form.order_id(value=orders.get_order_id())}} 
+                            {{ done_cooking_form.done_cooking(class_="btn order-done-btn")}}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="order-details">
+            <p>Order Date: {{ orders.get_order_date_time().strftime("%d/%m/%Y %I:%M %p") }}</p>
+            {% for items in orders.get_cart_items() %}
+            <div class="row items-details">
+                <div class="col-sm-6">
+                    <img src="/static/Images/Menus/{{ items.get_image() }}" alt="item image" class="img-fluid rounded">
+                </div>
+                <div class="col-sm-6">
+                    <div class="item-description">
+                        <h3>{{ items.get_name() }}</h3>
+                        <span style="font-size: 1.5rem; font-weight: bold;">Quantity: </span>
+                        <span style="font-size: 1.5rem;">{{ items.get_quantity() }}</span>
+                        <div class="item-additional-request">
+                            <h3>Customer's Additional Request</h3>
+                            <p>{{ items.get_additional_request() }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% if not customer_orders_list %}
+    <p class="text-center">There are no orders currently.</p>
+    {% endif %}
+</div>
+{% endblock %}

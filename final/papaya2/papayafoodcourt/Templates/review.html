@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}
+Papaya Food Court - Reviews
+{% endblock %}
+
+{%block head%}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/review.css') }}">
+{%endblock%}
+
+
+{% block content %}
+<hr>
+<div class="container">
+<h1 class="display-4">Review System</h1>
+<form method="POST" action="">
+  <div class="form">
+    <div class="form-group">
+      {{ form.customer_name.label()}}
+      {{ form.customer_name(class_="form-control", placeholder="Enter your name here")}}
+    </div>
+    <br>
+    <div class="form-group">
+      {{ form.review_store.label()}} 
+      {{ form.review_store(class_="form-control", placeholder="Select Store To Review")}}
+    </div>
+    <br>
+    <div class="form-group">
+      {{ form.review_type.label() }}
+      {{ form.review_type(class_="form-select")}}
+    </div>
+    <br>
+    <div class="form-group">
+      {{ form.star_review.label() }}
+      {{ form.star_review(class_="form-control")}}
+    </div>
+    <br>
+    <div class="form-group">
+      {{ form.remarks.label() }}
+      {{ form.remarks(class_="form-control") }}
+    </div>
+    <div style="color:darkred; margin-left:0.09em;">
+    <b><i><strong>(Please check all fields before submitting!)</strong></i></b><br>
+    </div>
+    <br>
+    <input type="submit" class="btn submit-btn" value="Submit Review!"/>
+    <p style="color:grey;"><small>By clicking "Submit Review!", you hereby agree to and accept our term of use and privacy policy. </small></p>
+  </div>
+</form>
+</div>
+
+<br>
+<hr>
+{% endblock %}
+
+

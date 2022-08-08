@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Manage Logs{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+{% endblock %}
+{% block content %}
+<div id="manage-user-table">
+<h4> Packages Versions</h4>
+  <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Package</th>
+                <th>Version Used</th>
+                <th>Latest Version</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+{%for i in range(packages_list| length)%}
+        <tr>
+        <td> {{packages_list[i][0]}}</td>
+        <td>{{packages_list[i][1]}}</td>
+        <td>{{packages_list[i][2]}}</td>
+            {%if packages_list[i][3] == "Outdated" %}
+                <td style="color:red"> {{packages_list[i][3]}}</td>
+            <td><a href="{{ url_for('update_package', package_name = packages_list[i])}}" class="btn manage-user-btns" id="create-user-btn">Update</a></td>
+            {%else%}
+                <td> {{packages_list[i][3]}}</td>
+                <td></td>
+            {%endif%}
+        </tr>
+{%endfor%}
+        </tbody>
+    </table>
+
+  </div>
+        <br><br><br><br><br >
+    <div class="containter">
+        <h4> Packages that is not in the requirements.txt</h4>
+  <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Package</th>
+                <th>Version</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+
+{%for i in range(packages| length)%}
+        <tr>
+        <td> {{packages[i][0]}}</td>
+            <td>{{packages[i][1]}}</td>
+            <td><a href="{{ url_for('add_package', package_name = packages[i])}}" class="btn manage-user-btns">Add</a></td>
+        </tr>
+{%endfor%}
+        </tbody>
+    </table>
+
+    </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+Stores
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/stores.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css')}}">
+{% endblock %}
+
+{% block content%}
+<hr>
+<div class="container">
+<h2>Stores</h2>
+  <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" data-interval="2500">
+    <ol class="carousel-indicators">
+      <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <a href=""><img class="d-block w-100" src="/static/Images/Menus/chickenrice.jpg" alt="First slide"></a>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Chicken Rice</h5>
+          <p></p>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <a href=""><img class="d-block w-100" src="static/Images/Menus/fishsoup.jpg" alt="Second slide"></a>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Fish Soup</h5>
+          <p></p>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <a href=""><img class="d-block w-100" src="static/Images/Menus/indian2.jpg" alt="Third slide"></a>
+        <div class="carousel-caption d-none d-md-block">
+          <h5>Indian Store</h5>
+          <p></p>
+        </div>
+      </div>
+    </div>
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+
+  <div class="store-catalog">
+    <div class="row">
+      {% for store in stores_list %}
+      <div class="col-sm-6">
+        <a href="/stores/{{ store.get_name() }}" style="text-decoration:none; color:#000000;">
+            <img src="static/Images/Stores/{{ store.get_image() }}" alt="{{ store.get_name() }}" class="img-thumbnail">
+            <h2>{{ store.get_name() }} Store</h2>
+            <h6 style="text-decoration:underline;">Store Description:</h6>
+            <p>{{ store.get_description() }}</p>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+<hr>
+{% endblock %}

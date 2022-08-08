@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Manage Logs{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+{% endblock %}
+{% block content %}
+
+<div id="manage-user-table">
+  <div class="row">
+    <div class="col-sm-9">
+      <h4>Monitoring Logs</h4>
+        <br>
+        <h5>There are current {{warning_count}} number of warning logs and {{info_count}} number of information logs.</h5>
+    </div>
+    <div class="col-sm-3">
+      <div class="row">
+        <div class="col-sm-8">
+          <form action="" method="post">
+            <div class="input-group">
+              {{ form.csrf_token }}
+              {{ form.search(class_="form-control", placeholder="Search") }}
+              <div class="input-group-append">
+                <button type="submit" class="btn manage-user-btns">Search</button>
+              </div>
+            </div>
+          </form>
+          <form action="" method="post">
+            <div class="form-group">
+                {{ filter.status.label() }}
+                {{ filter.status(class_="form-select")}}
+              <div class="input-group-append">
+                <button type="submit" class="btn manage-user-btns">Submit</button>
+              </div>
+            </div>
+          </form>
+
+
+        </div>
+
+      </div>
+    </div>
+
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Time</th>
+                <th>Information</th>
+            </tr>
+        </thead>
+        <tbody>
+
+{%for i in range(logging_list| length)|reverse%}
+        <tr>
+        <td> {{logging_list[i][0]}}</td>
+        <td>{{logging_list[i][1]}}</td>
+        <td> {{logging_list[i][2]}}</td>
+        </tr>
+{%endfor%}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+  </div></div>

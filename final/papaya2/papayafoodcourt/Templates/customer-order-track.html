@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{%block title%}Papaya Food Court - Track Order{%endblock%}
+{% block head %}
+<link href="{{ url_for('static', filename='CSS/NavFooter.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='CSS/ordertracking.css') }}" rel="stylesheet"/>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center">Track Your Order</h2>
+    {% if user_order %}
+    <h3>Order #{{ user_order.get_order_id() }}</h3>
+    
+    {% if user_order.get_delivery_stage() == "Cooking" %}
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p>Your order is currently busy being prepared by our staff!</p>
+    
+    {% elif user_order.get_delivery_stage() == "Delivering" %}
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p>Order Done Cooking! Now delivering to your address!</p>
+    
+    {% elif user_order.get_delivery_stage() == "Delivered"%}
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p>Your ordered has been delivered, enjoy your food!</p>
+    {% endif %}
+    
+    <dl class="row estimated-time-font">
+        <dt class="col-sm-3">Estimated Time To be Delivered</dt>    
+        <dd class="col-sm-9">{{ estimate_time }}</dd>
+    </dl>
+    
+    <div class="order-container">
+        <h2 class="text-center">Order Summary</h2>
+        <p>Order Date: {{ order_date_time }}</p>
+        {% for items in user_order.get_cart_items() %}
+        <div class="row item-container">
+            <div class="col-sm-6">
+                <img src="/static/Images/Menus/{{ items.get_image() }}" alt="item image" class="img-fluid rounded">
+            </div>
+            <div class="col-sm-6">
+                <h3>{{ items.get_name() }}</h3>
+                <div class="item-description">
+                    <dl class="row estimated-time-font">
+                        <dt class="col-4">Quantity:</dt>    
+                        <dd class="col-8">{{ items.get_quantity() }}</dd>
+                        
+                        <dt class="col-4">Total Cost:</dt>    
+                        <dd class="col-8">${{ items.get_total_price() }}</dd>
+                    </dl>
+                    <h3>Additional Requests</h3>
+                    <p>{{ items.get_additional_request() }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>You have not ordered yet, go to the store to buy our food!</p>
+    <a href="/userStores" class="btn store-btn">Store</a> 
+    {% endif %}
+</div>
+{% endblock %}

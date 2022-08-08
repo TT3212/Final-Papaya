@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h4>Edit User ({{ selected_user.get_username() }})</h4>
+    {{selected_user.get_username()}}
+    <form action="" method="post" enctype="multipart/form-data" autocomplete="off">
+        {{ form.csrf_token}}
+        <div class="form-group">
+            {{ form.email_address.label() }}
+            {{ form.email_address(class_="form-control", placeholder=selected_user.get_email_address()) }}
+            {% for errors in form.email_address.errors %}
+                <span class="text-danger">{{ errors }}</span>
+            {% endfor%}
+        </div>
+        <div class="form-group" >
+            {{ form.username.label() }}
+            {{ form.username(class_="form-control", placeholder=selected_user.get_username(), autocomplete= "new-password") }}
+            {% for errors in form.username.errors %}
+                <span class="text-danger">{{ errors }}</span>
+            {% endfor%}
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    {{ form.first_name.label() }}
+                    {{ form.first_name(class_="form-control")}}
+                </div>
+            </div>
+            
+            <div class="col-sm-6">
+                <div class="form-group">
+                    {{ form.last_name.label() }}
+                    {{ form.last_name(class_="form-control")}}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.account_type.label() }}
+            {{ form.account_type(class_="form-select")}}
+        </div>
+        
+        {% if selected_user.get_account_type() == "Customer" %}
+        <div class="form-group">
+            {{ form.membership.label() }}
+            {{ form.membership(class_="form-select")}}
+        </div>
+        {% endif%}
+        <div class="form-group">
+            {{ form.profile_picture.label() }}
+            {{ form.profile_picture(class_="form-control")}}
+            {% for errors in form.profile_picture.errors  %}
+                <span class="text-danger">{{ errors }}</span>
+            {% endfor %}
+        </div>
+        
+        <div class="form-group">
+            {{ form.description.label() }}
+            {{ form.description(class_="form-control") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.password.label() }}
+            {{ form.password(class_="form-control", autocomplete= "new-password")}}
+            {% for errors in form.password.errors %}
+                <span class="text-danger">{{ errors }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group" >
+            {{ form.confirm_password.label() }}
+            {{ form.confirm_password(class_="form-control")}}
+            {% for errors in form.confirm_password.errors %}
+                <span class="text-danger">{{ errors }}</span>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-papaya">Edit</button>
+    </form>
+</div>
+{% endblock %}

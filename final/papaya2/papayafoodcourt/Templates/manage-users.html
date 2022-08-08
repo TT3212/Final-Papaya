@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+{% endblock %}
+{% block content %}
+
+<div id="manage-user-table">
+  <div class="row">
+    <div class="col-sm-9">
+      <h4>Manage Users</h4>
+    </div>
+    <div class="col-sm-3">
+      <div class="row">
+        <div class="col-sm-4">
+          <a href="{{ url_for('create_user') }}" class="btn manage-user-btns" id="create-user-btn">Create a User</a>
+        </div>
+        <div class="col-sm-8">
+          <form action="" method="post">
+            <div class="input-group">
+              {{ form.csrf_token }}
+              {{ form.search(class_="form-control", placeholder="Search with usernames") }}
+              <div class="input-group-append">
+                <button type="submit" class="btn manage-user-btns">Search</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h5>There are currently {{ users_count }} users registered.</h5>
+  <div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Email Address</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Description</th>
+                <th>Account Type</th>
+                <th>Membership</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for users in users_list %}
+            <tr>
+               <td>{{ users.get_id() }}</td> 
+               <td>{{ users.get_username() }}</td>
+               <td>{{ users.get_email_address() }}</td>
+               <td>{{ users.get_first_name() }}</td>
+               <td>{{ users.get_last_name() }}</td>
+               <td>{{ users.get_description() }}</td>
+               <td>{{ users.get_account_type() }}</td>
+
+               {% if users.get_account_type() == "Customer" %}
+                    <td>{{ users.get_membership() }}</td>
+               {% else %}
+                    <td>None</td>
+               {% endif %}
+
+               {% if users != current_user %}
+                    <td>
+                        <a href="{{ url_for('edit_user', user_id=users.get_id()) }}" class="btn btn-info">Edit</a>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin_send_reset_password_email',  user_id=users.get_id()) }}" class="btn btn-info">Reset Password</a>
+                    </td>
+
+
+                    <td>
+                    <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteUser-{{ users.get_id() }}">
+                            <span>Delete</span>
+                        </button>
+                    
+                    <!-- Modal -->
+                        <div class="modal fade" id="deleteUser-{{ users.get_id() }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Delete User</h5>
+                                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                <span>Are you sure you want to delete user "{{ users.get_username() }}"?</span>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('delete_user', user_id=users.get_id()) }}" method="post">
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+.checkoutarea{
+    font-size: 1.5rem;
+    /*background-color: #98FB98;*/
+    border: 2px solid black;
+    padding: 2rem;
+}
+
+.checkoutstring{
+    margin-left: 750px;
+    margin-top: -340px;
+    margin-bottom: 200px;
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 40px;
+  border-radius:25px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-left: 5px;
+  margin-top: 10px;
+}
+
+.button2{
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 40px;
+  border-radius:25px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-left: 165px;
+  margin-top: -53px;
+  position: absolute;
+}
+
+.checkout_button{
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 40px;
+  border-radius:25px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.dmethod_string{
+  font-weight: bold;
+}

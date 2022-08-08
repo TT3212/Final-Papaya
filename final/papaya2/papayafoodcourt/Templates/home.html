@@ -1,0 +1,100 @@
+{%extends "base.html"%}
+{%block title%}Papaya Food Court{%endblock%}
+
+{% block head %}
+<link rel="stylesheet" href="static/CSS/home.css">
+<link rel="stylesheet" href="static/CSS/NavFooter.css">
+{% endblock %}
+
+{%block content%}
+  {% if current_user.is_authenticated %}
+            {% if current_user.get_account_type() == "Staff" %}
+              <div class="BackgroundImages">
+
+              </div>
+
+                <div class="WhiteSpace" style="text-align: center; padding-right: 70px" >
+                  <h1 style="padding-left: 80px">Sales Dashboard</h1>
+                  <a href="#" class="button">View More</a>
+                </div>
+              <div class="carouselHeader" style="text-align: center">
+                <h1>Business Overview</h1>
+              </div> <br><br>
+
+                <section class="featured-services section-bg">
+                  <div class="container">
+
+                    <div class="row no-gutters">
+                      <div class="col-lg-4 col-md-6">
+                        <div class="icon-box">
+                          <h4 class="title" style="color: #5cb874; text-align: center">Number of Orders</h4>
+                          <p class="description"  style="line-height: 50px;font-size: 30px;text-align: center;">{{no_of_orders}} orders</p>
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-6">
+                        <div class="icon-box">
+                          <h4 class="title" style="color: #5cb874;text-align: center">Number of Users</h4>
+                          <p class="description" style="line-height: 50px;font-size: 30px;text-align: center;">{{users_list}} users</p>
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-6">
+                        <div class="icon-box">
+                          <h4 class="title" style="color: #5cb874; text-align: center">Number of Stores</h4>
+                          <p class="description" style="line-height: 50px;font-size: 30px;text-align: center;">{{stores_list}} stores</p>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </section><!-- End Featured Services Section -->
+              <br>
+              <br>
+            {% elif current_user.get_account_type() == "Admin" %}
+              <div class="BackgroundImages">
+
+              </div>
+
+                <div class="WhiteSpace" style="text-align: center; padding-right: 70px" >
+                  <h1 style="padding-left: 80px">Sales Dashboard</h1>
+                  <a href="#" class="button">View More</a>
+                </div>
+              <div class="carouselHeader" style="text-align: center">
+                <h1>Business Overview</h1>
+              </div> <br><br>
+
+            <section id="featured-services" class="featured-services section-bg">
+              <div class="container">
+
+                <div class="row no-gutters">
+                  <div class="col-lg-4 col-md-6">
+                    <div class="icon-box">
+                      <h4 class="title" style="color: #5cb874; text-align: center">Number of Orders</h4>
+                      <p class="description"  style="line-height: 50px;font-size: 30px;text-align: center;">{{no_of_orders}} orders</p>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 col-md-6">
+                    <div class="icon-box">
+                      <h4 class="title" style="color: #5cb874;text-align: center">Number of Users</h4>
+                      <p class="description" style="line-height: 50px;font-size: 30px;text-align: center;">{{users_list}} users</p>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 col-md-6">
+                    <div class="icon-box">
+                      <h4 class="title" style="color: #5cb874; text-align: center">Number of Stores</h4>
+                      <p class="description" style="line-height: 50px;font-size: 30px;text-align: center;">{{stores_list}} stores</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </section><br><br>
+
+            {% elif current_user.get_account_type() == "Customer" %}
+              {% include 'customer_home.html' %}
+            {% endif %}
+        {% else %}
+              {% include 'customer_home.html' %}
+
+      {% endif %}
+
+{% endblock %}

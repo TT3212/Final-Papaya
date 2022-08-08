@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block head %}
+{% if current_user.is_authenticated %}
+
+    {% if current_user.get_account_type() == "Staff" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/staff.css') }}">
+    {% elif current_user.get_account_type() == "Admin" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+    {% elif current_user.get_account_type() == "Customer" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+    {% endif %}
+{% else %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+{% endif %}
+
+<link rel="stylesheet" href="{{ url_for('static',filename='CSS/NavFooter.css') }}">
+{% endblock %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h3 class="text-center">An OTP has been sent to your email.</h3>
+    <form action="" method="post">
+        <div class="auth-form">
+            <div class="form-group row inputs">
+                <label for="otp" class="col-sm-2 col-form-label">OTP</label>
+                <div class="col-sm-6">
+                    <input type="number" class="form-control" id="otp" name="otp" required>
+                </div>
+                <div class="col-sm-2">
+                    <a href="/login/2fa"><small>Send again</small></a>
+                </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-papaya">Verify</button>
+        </div>
+    </form>
+    <br><br>
+{% endblock %}

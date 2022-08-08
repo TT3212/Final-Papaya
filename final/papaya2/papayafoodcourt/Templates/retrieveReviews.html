@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+Papaya Food Court - Retrieve Reviews
+{% endblock %}
+
+{%block head%}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+{%endblock%}
+
+{% block content %}
+<hr>
+<h2 class="display-4" style="text-align:center;">Retrieve Users</h2>
+<div style="text-align:center;">
+  <b>
+  {% if count == 0 %}
+  <p>There are no reviews currently!</p>
+  {% elif count == 1 %}
+  <p>There is 1 review currently!</p>
+  {% else %}
+  <p>There are {{ count }} reviews currently!</p>
+  {% endif %}
+  </b>
+</div>
+<br>
+<div class="container">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><i>User ID</i></th>
+        <th><i>Name</i></th>
+        <th><i>Reviewed Store</i></th>
+        <th><i>Reviewed Type</i></th>
+        <th><i>Star Rating</i></th>
+        <th><i>Remarks</i></th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for reviewUser in reviewUsers_list %}
+      <tr>
+        <td>{{ reviewUser.get_review_id() }}</td>
+        <td>{{ reviewUser.get_customer_name() }}</td>
+        <td>{{ reviewUser.get_review_store() }}</td>
+        <td>{{ reviewUser.get_review_type() }}</td>
+        <td>{{ reviewUser.get_star_review() }}</td>
+        <td>{{ reviewUser.get_remarks() }}</td>
+        <td><a href="/updateReviews/{{reviewUser.get_review_id()}}" class="btn btn-warning">Update Review</a></td>
+        <td>
+          <form action="{{url_for('delete_reviewUser', id=reviewUser.get_review_id())}}" method="POST">
+            <input type="submit" value="Delete Review" class="btn btn-danger">
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+
+    </tbody>
+  </table>
+</div>
+<br><br><br><br>
+<hr>
+{% endblock %}
+

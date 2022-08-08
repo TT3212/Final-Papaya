@@ -1,0 +1,16 @@
+.breadcrumb-links {
+    text-decoration: none;
+    color: #000000;
+}
+
+.breadcrumb-links:hover {
+    color: #000000;
+    text-decoration: underline;
+    text-decoration-color: #4CAF50;
+    text-decoration-thickness: 20%;
+}
+
+.create-btn {
+    background-color: #4CAF50;
+    color: white;
+}

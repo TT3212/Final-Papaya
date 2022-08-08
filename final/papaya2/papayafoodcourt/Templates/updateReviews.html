@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block head%}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css')}}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/review.css')}}">
+{% endblock%}
+{% block title %}
+Papaya Food Court - Update Reviews
+{% endblock %}
+
+
+{% block content %}
+<hr>
+
+<i><u><h3 class="display-4" style="text-align:center;">Update Reviews</h3></u></i>
+<br>
+<div class="container">
+<form method="POST" action="">
+  <div class="form-group">
+    {{ form.customer_name.label()}}
+    {{ form.customer_name(class_="form-control", placeholder="Enter your name here")}}
+  </div>
+  <br>
+  <div class="form-group">
+    {{ form.review_store.label()}} 
+    {{ form.review_store(class_="form-control", placeholder="Select Store To Review")}}
+  </div>
+  <br>
+  <div class="form-group">
+    {{ form.review_type.label() }}
+    {{ form.review_type(class_="form-select")}}
+  </div>
+  <br>
+  <div class="form-group">
+    {{ form.star_review.label() }}
+    {{ form.star_review(class_="form-control")}}
+  </div>
+  <br>
+  <div id="prof">
+    <div class="form-group">
+    {{ form.remarks.label() }}
+    {{ form.remarks(class_="form-control") }}
+    </div>
+  </div>
+  <br>
+  <input type="submit" value="Submit" class="btn submit-btn"/>
+</form>
+
+</div>
+<hr>
+{% endblock %}

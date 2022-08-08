@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{%block title%}Papaya Food Court | {{ store_name }} {%endblock%}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/stores.css')}}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/stores" class="breadcrumb-links">Stores</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ store_name }}</li>
+      </ol>
+    </nav>
+</h3>
+    <div class="row">
+        {% for product in product_list %}
+        <div class="col-sm-6">
+            <a href="/stores/{{ store_name }}/{{ product.get_name() }}" style="text-decoration:none; color:#000000;">
+                <img src="/static/Images/Menus/{{ product.get_image() }}" alt="{{ product.get_name() }}" class="img-thumbnail">
+                <h5>Food Name: {{ product.get_name() }}</h5>
+                <h6>Food Price: ${{ product.get_price() }}</h6>
+                <h6>Food Description: {{ product.get_description() }}</h6>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
