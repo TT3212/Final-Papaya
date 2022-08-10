@@ -7,24 +7,39 @@ import shelve
 from flask_login import current_user
 import re
 
-
 def validate_password(form, field):
     special_char = ['~', '!', '@', '#', '$', '%', '^', '&', '*', '(', '-', '_', '+', '=', '[', ']', '{', '}', '|', ';', ':', ',', '.', '<', '>', '/', '?']
+    # Sources: https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10k-most-common.txt
     common_password = open('common_password.txt', 'r')
+    j = ''
+    count = 0
+    if field.data.upper() in common_password.read().upper():
+        raise validators.ValidationError('Please do not use a easily guessed password. This will put your account at high risk of compromise.')
     if not re.search('\d', field.data):
         raise validators.ValidationError('Password must contain at least one number.')
     if not re.search('[A-Z]', field.data):
-        raise validators.ValidationError('Password must contain at least one uppercase.')
+        raise validators.ValidationError('Password must contain at least one uppercase letter.')
     if not re.search('[a-z]', field.data):
-        raise validators.ValidationError('Password must contain at least one lowercase.')
+        raise validators.ValidationError('Password must contain at least one lowercase letter.')
+    # According to NIST password guidelines, using complex password may make it easier to crack the password
+    # https://www.auditboard.com/blog/nist-password-guidelines/
+    # if not any(char in special_char for char in field.data):
+    #     raise validators.ValidationError('Password must contain at least one special character.')
+    for i in field.data:
+        if j != '':
+            if i == j:
+                count += 1
+                if count >= 3:
+                    raise validators.ValidationError('Password cannot have more than 3 consecutive repeating characters.')
+            else:
+                j = i
+        else:
+            count += 1
+            j = i
     if len(field.data) < 7:
         raise validators.ValidationError('Password length should be at least 8 characters.')
     if len(field.data) > 25:
         raise validators.ValidationError('Password length is too long. Please reduce to within 25 characters.')
-    if not any(char in special_char for char in field.data):
-        raise validators.ValidationError('Password must contain at least one special character.')
-    # if field.data in common_password.read():
-    #     raise validators.ValidationError('Password was found in a data breach. Please use a secure password.')
 
 def validate_existing_email(form, field):
     db = shelve.open('users.db', 'r')
@@ -83,13 +98,13 @@ class RequiredIf(InputRequired):
 class RegisterForm(FlaskForm):
     email_address = EmailField('Email Address:', [validators.Email(), validators.DataRequired(), validate_existing_email])
     username = StringField('Username:', [validators.Length(min=1, max=150), validators.DataRequired(), validate_existing_username])
-    password = PasswordField('Password:', [validators.Length(min=8, max=150), validators.InputRequired(), validate_password])
+    password = PasswordField('Password:', [validators.Length(min=8, max=64), validators.InputRequired(), validate_password])
     confirm_password = PasswordField('Confirm Password:', [validators.EqualTo('password', message='Passwords must match'), validators.InputRequired()])
 
 
 class LoginForm(FlaskForm):
     login_email = EmailField('Email Address:', [validators.Email(), validators.DataRequired()])
-    login_password = PasswordField('Password:', [validators.InputRequired()])
+    login_password = PasswordField('Password:', [validators.InputRequired()], id='visible')
 
 
 class ProfileForm(FlaskForm):
