@@ -1,19 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
-{% if current_user.is_authenticated %}
-
-    {% if current_user.get_account_type() == "Staff" %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/staff.css') }}">
-    {% elif current_user.get_account_type() == "Admin" %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
-    {% elif current_user.get_account_type() == "Customer" %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
-    {% endif %}
-{% else %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
-{% endif %}
-
+<link rel="stylesheet" href="static/CSS/accounts.css">
+<link rel="stylesheet" href="static/CSS/NavFooter.css">
 {% endblock %}
 {% block title %}Login{% endblock %}
 {% block content %}
@@ -33,7 +21,8 @@
                 {{ form.login_password.label(class_="col-sm-2 col-form-label")}}
                 <div class="col-sm-10">
                     {{ form.login_password(class_="form-control") }}
-                    </small><a href="/reset-password" class=""><small>Reset Password</small></a>
+                    <small><input type="checkbox" style="margin:5px;" onclick="passwordVisible()">Show Password</small>
+                    <a style="float:right;" href="/reset-password" class=""><small>Reset Password</small></a>
                 </div>
             </div>
             <br>
@@ -52,5 +41,14 @@
 {% endblock %}
 
 {% block scripts %}
-
+    <script>
+        function passwordVisible() {
+          var x = document.getElementById("visible");
+          if (x.type === "password") {
+            x.type = "text";
+          } else {
+            x.type = "password";
+          }
+        }
+    </script>
 {% endblock %}
