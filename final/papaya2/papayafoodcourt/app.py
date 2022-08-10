@@ -16,7 +16,8 @@ from forms import (
     StoreForm,
     ReviewsForm,
     SearchLogs,
-    MonitorFilter
+    MonitorFilter,
+    PaymentForm
 )
 import shelve
 from User import User
@@ -60,7 +61,7 @@ import secure
 from hashing import hash_SHA512, history
 from monitoring import updated_lib, update_module, outdated_lib, freeze_check, adding_package, sorting
 
-app = Flask(__name__, template_folder='Templates')
+app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.config["SECRET_KEY"] = "test-secret-key"
 app.config['RECAPTCHA_SITE_KEY']= '6LefYcwgAAAAABZjijwkQ08oTBH2Q7WH9MN1nKIA'
@@ -94,6 +95,18 @@ Scheduling for order tracking
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.start()
 
+logger = logging.getLogger("Papaya_Food_Court")
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter(' %(levelname)s , %(asctime)s , %(message)s',datefmt="%Y-%m-%d - %H:%M:%S")
+ch.setFormatter(formatter)
+fh = logging.FileHandler("myapp.log","a")
+fh.setLevel(logging.INFO)
+fh.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(fh)
+
 
 logger = logging.getLogger("Papaya_Food_Court")
 logger.setLevel(logging.DEBUG)
@@ -108,7 +121,9 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
+
 secure_headers = secure.Secure()
+
 
 
 def save_picture(form, directory, size):
@@ -132,6 +147,12 @@ def save_picture(form, directory, size):
     resized_image.save(picture_path)
 
     return picture_name
+
+
+@app.after_request
+def add_security_headers(resp):
+    resp.headers['Content-Security-Policy']='default-src \'self\''
+    return resp
 
 
 @login_manager.user_loader
@@ -262,34 +283,36 @@ def login():
 
                 if request.method == 'POST':
                     if recaptcha.verify(): # Use verify() method to see if ReCaptcha is filled out
+                        # check if user's account has been locked due to multiple invalid login attempts
                         if check_failed_attempt('check') == True:
                             check_failed_attempt('reset')
                             login.otp = generateOTP()
                             return redirect(url_for('login_2fa'))
                         else:
-                            time.sleep(10)
-                            check_failed_attempt('reset')
+                            print('failed')
                     else:
-                        time.sleep(3)
-                        message = login.user.get_email_address()+ ' attempted to sign in. Did not verify robot status'
+                        ip_addr = 'IP Address: ' + str(request.remote_addr)
+                        os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+                        message = login.user.get_email_address() + ' attempted to sign in. Did not verify robot status. ' + ip_addr + os
                         logger.warning(message)
-                        flash("Please check that you're not a robot.", 'warning')
-                # login_user(user)
-                # return redirect(url_for('home'))
+                        flash("Please verify your robot status.", 'warning')
             else:
-                time.sleep(3)
                 check_failed_attempt('failed')
-                message = login.user.get_email_address()+ ' attempted to sign in'
-                logger.warning(message)
                 flash("Incorrect email address or passwords", "danger")
+                ip_addr = 'IP Address: ' + str(request.remote_addr)
+                os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+                message = login.user.get_email_address() + ' attempted to sign in. ' + ip_addr + os
+                logger.warning(message)
         else:
-            time.sleep(3)
-            message = login.user.get_email_address()+ ' attempted to sign in'
+            ip_addr = 'IP Address: ' + str(request.remote_addr)
+            os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+            message = login.user.get_email_address() + ' attempted to sign in. ' + ip_addr + os
             logger.warning(message)
             flash("Incorrect email address or password", "danger")
         db.close()
     return render_template("login.html", form=login_form)
 
+# Check how many attempts a user has entered a wrong password
 def check_failed_attempt(action):
     users_dict = {}
     db = shelve.open("users.db", "c")
@@ -300,6 +323,7 @@ def check_failed_attempt(action):
             db["Users"] = users_dict
     except:
         abort(500)
+        
     # in case account is created before implementing this, set failed attempt to 0
     while True:
         try:
@@ -307,6 +331,7 @@ def check_failed_attempt(action):
             break
         except:
             login.user.set_failed_attempt(0)
+            
     if action == 'check':
         if attempt < 3:
             return True
@@ -314,18 +339,15 @@ def check_failed_attempt(action):
     elif action == 'failed':
         if attempt < 3:
             attempt += 1
-            print(attempt)
             if attempt == 3:
-                flash('Your account has been locked temporary for 5 minutes due to multiple invalid login attempts.', 'danger')
-                send_locked_email()
+                flash("Your account has been locked. We've sent an email to you to reactivate it.", 'danger')
+                send_locked_email(login.user)
             else:
                 flash('Your account will be locked after 3 consecutive failed login attempts.', 'danger')
         else:
             print(login.user.get_failed_attempt())
-            flash('Your account is locked. Please try again later.', 'danger')
-            # comment out the following line if lazy to wait
-            time.sleep(10)
-            attempt = 0
+            flash('Your account is locked. Please check your email.', 'danger')
+            send_locked_email(login.user)
     elif action == 'reset':
         attempt = 0
 
@@ -336,16 +358,18 @@ def check_failed_attempt(action):
     db["Users"] = users_dict
     db.close()
 
-def send_locked_email():
+def send_locked_email(user):
+    token = user.get_reset_token()
     msg = Message(
-            "Papaya Food Court: Account Locked",
-            sender="info@papayafoodcourt.com",
-            recipients=[login.user.get_email_address()],
-            )
-    msg.body = "Was that you? Your account has been locked temporary for 5 minutes due to multiple invalid login attempts." \
-                "\nIf it wasn't you, please proceed to http://127.0.0.1:5000/reset-password to reset your password."
-    msg.html = '<h2>Was that you?</h2><h4>Your account has been locked temporary for 5 minutes due to multiple invalid login attempts.</h4>' \
-               '<p><small>If it was not done by you, please reset your password <a href="http://127.0.0.1:5000/reset-password">here</a></small></p>'
+        "Papaya Food Court: Account Locked",
+        sender="noreplypapayafood@gmail.com",
+        recipients=[user.get_email_address()],
+    )
+    msg.body = f"""Your account has been locked due to multiple invalid login attempts. Please visit the following link to reactivate your account.
+{url_for('reactivate_token', token=token, _external=True)}
+
+If it wasn't you, please proceed to http://127.0.0.1:5000/reset-password to reset your password.
+    """
     mail.send(msg)
 
 def generateOTP():
@@ -353,10 +377,10 @@ def generateOTP():
     otp = totp.now()
     msg = Message(
         "Papaya Food Court: Verification Code",
-        sender=('PAPAYA Food Court', "info@papayafoodcourt.com"),
+        sender=('PAPAYA Food Court', "noreplypapayafood@gmail.com"),
         recipients=[login.user.get_email_address()],
     )
-    msg.body = 'Your OTP is ' + otp + ' \nIf you did not request for this, please contact our customer service via info@papayafoodcourt.com'
+    msg.body = 'Your OTP is ' + otp + ' \nIf you did not request for this, please contact our customer service via noreplypapayafood@gmail.com'
     msg.html = '<h4>Your OTP is ' + otp + '</h4> \n' \
                                          '<p><small>If you did not request for this, please contact our customer service via <a href="noreplypapayafood@gmail.com">noreplypapayafood@gmail.com</a>.</small></p>'
     mail.send(msg)
@@ -372,11 +396,11 @@ def login_2fa():
             login_user(login.user)
             msg = Message(
             "Papaya Food Court: Login Notification",
-            sender="info@papayafoodcourt.com",
+            sender="noreplypapayafood@gmail.com",
             recipients=[login.user.get_email_address()],
             )
             msg.body = "We just noticed a new login to your PAPAYA account." \
-                        "\nIf it wasn't you, please contact our customer service via info@papayafoodcourt.com"
+                        "\nIf it wasn't you, please contact our customer service via noreplypapayafood@gmail.com"
             msg.html = '<h4>We just noticed a new login to your PAPAYA account.</h4>' \
                        '<p><small>If it was not done by you, please contact our customer service via <a href="noreplypapayafood@gmail.com">noreplypapayafood@gmail.com</a></small></p>'
             mail.send(msg)
@@ -395,12 +419,18 @@ def login_2fa():
                     edit_pw["users"] = edited_user_p
                     return redirect(url_for("admin_reset_password")), flash("Please change your password!", "warning")
             return redirect(url_for("home"))
-            message = login.user.get_email_address()+ ' successfully signed in'
-            logger.info(message)
+            ip_addr = 'IP Address: ' + str(request.remote_addr)
+            os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+            message = login.user.get_email_address() + ' successfully signed in. ' + ip_addr + os
+            logger.warning(message)
         elif entered_otp is not None:
-            message = login.user.get_email_address()+ ' attempted to sign in. Incorrect OTP was inputted'
+            ip_addr = 'IP Address: ' + str(request.remote_addr)
+            os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+            message = login.user.get_email_address() + ' attempted to sign in. Incorrect OTP was inputted. ' + ip_addr + os
             logger.warning(message)
             flash("Incorrect OTP", "danger")
+    else:
+        login.otp = generateOTP()
     return render_template('login_2fa.html')
 
 
@@ -446,7 +476,9 @@ def register():
             db["Users"] = users_dict
             flash("Account Created!", "success")
             db.close()
-            message = user.get_email_address()+' successfully registered'
+            ip_addr = 'IP Address: ' + str(request.remote_addr)
+            os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+            message = user.get_email_address() + ' successfully registered. ' + ip_addr + os
             logger.info(message)
             return redirect(url_for("login"))
     return render_template("register.html", form=register_form)
@@ -464,7 +496,7 @@ def send_reset_email(user):
     token = user.get_reset_token()
     msg = Message(
         "Papaya Food Court: Password Reset Request",
-        sender="info@papayafoodcourt.com",
+        sender="noreplypapayafood@gmail.com",
         recipients=[user.get_email_address()],
     )
     msg.body = f"""To reset your password, visit the following link:
@@ -472,7 +504,9 @@ def send_reset_email(user):
 
 If you did not make this request then simply ignore this email.
     """
-    message = 'reset password email has been sent to ',user.get_email_address()
+    ip_addr = 'IP Address: ' + str(request.remote_addr)
+    os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+    message = 'Reset password email has been sent to ' + user.get_email_address() + ip_addr + os
     logger.info(message)
     mail.send(msg)
 
@@ -499,7 +533,9 @@ def reset_password():
         user = values_list[email_index]
         send_reset_email(user)
         db.close()
-        message = 'reset password email has been sent to '+ request_reset_form.email_address.data
+        ip_addr = 'IP Address: ' + str(request.remote_addr)
+        os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+        message = 'Reset password email has been sent to ' + request_reset_form.email_address.data + ip_addr + os
         logger.info(message)
         flash(
             "An email has been sent with instructions to reset your password.", "info"
@@ -532,7 +568,9 @@ def admin_send_reset_password_email(user_id):
             user = values_list[email_index]
             send_reset_email(user)
             db.close()
-            message = 'reset password email has been sent to '+ request_reset_form.email_address.data
+            ip_addr = 'IP Address: ' + str(request.remote_addr)
+            os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+            message = 'Reset password email has been sent to ' + request_reset_form.email_address.data + ip_addr + os
             logger.info(message)
             flash( "An email has been to selected user to reset their password.", "info")
 
@@ -585,7 +623,9 @@ def admin_reset_password():
                         password_list.append(hash_obj)
                         password_dict[current_user.get_email_address()] = password_list
                         db["password"] = password_dict
-                        message = current_user.get_email_address()+ ' reset their password'
+                        ip_addr = 'IP Address: ' + str(request.remote_addr)
+                        os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+                        message = current_user.get_email_address() + ' has reset his/her password. ' + ip_addr + os
                         logger.info(message)
                         db.close()
                         flash("Your password has been updated!", "success")
@@ -599,7 +639,9 @@ def admin_reset_password():
                 password_list.append(hash_obj)
                 password_dict[current_user.get_email_address()] = password_list
                 db["password"] = password_dict
-                message = current_user.get_email_address()+ ' reset their password'
+                ip_addr = 'IP Address: ' + str(request.remote_addr)
+                os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+                message = current_user.get_email_address() + ' has reset his/her password. ' + ip_addr + os
                 logger.info(message)
                 db.close()
                 flash("Your password has been updated!", "success")
@@ -607,6 +649,18 @@ def admin_reset_password():
         return render_template("reset-password.html", form=reset_form)
     else:
         abort(403)
+
+
+@app.route("/reactivate-account/<token>", methods=["GET", "POST"])
+def reactivate_token(token):
+    user = User.verify_reset_token(token)
+    db = shelve.open("users.db", "w")
+    if user is None:
+        flash("Invalid or expired token!", "warning")
+        return redirect(url_for("reset_password"))
+    check_failed_attempt('reset')
+    flash('Your account has been reactivated successfully.', 'info')
+    return redirect(url_for("login"))
 
 
 @app.route("/reset-password/<token>", methods=["GET", "POST"])
@@ -654,14 +708,28 @@ def reset_token(token):
                     password_list.append(hash_obj)
                     password_dict[user.get_email_address()] = password_list
                     db["password"] = password_dict
-                    message = user.get_email_address()+ ' reset their password'
+                    ip_addr = 'IP Address: ' + str(request.remote_addr)
+                    os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+                    message = user.get_email_address() + ' has reset his/her password. ' + ip_addr + os
                     logger.info(message)
                     db.close()
                     flash("Your password has been updated!", "success")
                     return redirect(url_for("home"))
-        message = user.get_email_address()+ ' has changed their password'
+        ip_addr = 'IP Address: ' + str(request.remote_addr)
+        os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+        message = user.get_email_address(), ' has reset his/her password. ' + ip_addr + os
         logger.info(message)
         flash("Your password has been updated!", "success")
+        msg = Message(
+            "Papaya Food Court: Password changed",
+            sender="noreplypapayafood@gmail.com",
+            recipients=[user.get_email_address()],
+            )
+        msg.body = "You have changed your password successfully." \
+                    "\nIf it wasn't you, please proceed to http://127.0.0.1:5000/reset-password to reset your password."
+        msg.html = '<h2>You have changed your password successfully.</h2>' \
+                   '<p><small>If it was not done by you, please reset your password <a href="http://127.0.0.1:5000/reset-password">here</a></small></p>'
+        mail.send(msg)
         if current_user.is_authenticated:
             return redirect(url_for("home"))
         else:
@@ -696,7 +764,9 @@ def profile():
         logged_in_user.set_description(profile_form.description.data)
 
         db["Users"] = users_dict
-        message = logged_in_user.get_email_address()+ ' has changed their password'
+        ip_addr = 'IP Address: ' + str(request.remote_addr)
+        os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+        message = logged_in_user.get_email_address() + ' has reset his/her password. ' + ip_addr + os
         logger.info(message)
         flash("Profile Updated!", "success")
         db.close()
@@ -1164,16 +1234,13 @@ def payment():
             cartDict[current_user.get_id()].get_subtotal_purchase()
         )
 
-        # Test
-        print("gst",cartDict[current_user.get_id()].payment_info[0].get_gst())
-        print('subtotal',cartDict[current_user.get_id()].get_subtotal_purchase())
-        print('delivery fee',cartDict[current_user.get_id()].payment_info[0].get_delivery_fee())
 
         cartDict[current_user.get_id()].set_final_total(cartDict[current_user.get_id()].payment_info[0].get_gst(),
                                                         cartDict[current_user.get_id()].get_subtotal_purchase(),
                                                         cartDict[current_user.get_id()].payment_info[0].get_delivery_fee())
 
         CartObject = cartDict[current_user.get_id()]
+        db["Cart"] = cartDict
         db["Cart"] = cartDict
         db.close()
 
@@ -1233,52 +1300,52 @@ def checkout():
 
         # Create a Payment Object
         PaymentObject = Payment()
+        payment_form = PaymentForm(request.form)
+        if payment_form.validate_on_submit():
+            if request.method == "POST":
+                first_name = request.form.get("FirstName")
+                last_name = request.form.get("LastName")
+                street_address = request.form.get("StreetAddress")
+                building_block = request.form.get("BuildingBlock")
+                city = request.form.get("City")
+                postal_code = request.form.get("PostalCode")
+                phone_number = request.form.get("PhoneNumber")
+                bill_info = request.form.get("BillInfo")
 
-        if request.method == "POST":
-            first_name = request.form.get("FirstName")
-            last_name = request.form.get("LastName")
-            street_address = request.form.get("StreetAddress")
-            building_block = request.form.get("BuildingBlock")
-            city = request.form.get("City")
-            postal_code = request.form.get("PostalCode")
-            phone_number = request.form.get("PhoneNumber")
-            bill_info = request.form.get("BillInfo")
+                # Update collected infomation
+                PaymentObject.set_first_name(first_name)
+                PaymentObject.set_last_name(last_name)
+                PaymentObject.set_street_address(street_address)
+                PaymentObject.set_building_block(building_block)
+                PaymentObject.set_city(city)
+                PaymentObject.set_postal_code(postal_code)
+                PaymentObject.set_phone_number(phone_number)
+                PaymentObject.set_bill_info(bill_info)
 
-            # Update collected infomation
-            PaymentObject.set_first_name(first_name)
-            PaymentObject.set_last_name(last_name)
-            PaymentObject.set_street_address(street_address)
-            PaymentObject.set_building_block(building_block)
-            PaymentObject.set_city(city)
-            PaymentObject.set_postal_code(postal_code)
-            PaymentObject.set_phone_number(phone_number)
-            PaymentObject.set_bill_info(bill_info)
+                # Payment Detail
+                card_number = request.form.get("cardNo")
+                card_name = request.form.get("cardName")
+                card_expiry_date = request.form.get("cardExpiryDate")
+                card_CVV = request.form.get("CVV")
 
-            # Payment Detail
-            card_number = request.form.get("cardNo")
-            card_name = request.form.get("cardName")
-            card_expiry_date = request.form.get("cardExpiryDate")
-            card_CVV = request.form.get("CVV")
+                print(card_number)
+                print(card_name)
+                print(card_expiry_date)
+                print(card_CVV)
+                print("``````````````````````````````````")
+                # Encrypt card-related sensitive information
+                encrypted_card_number = encryption(KeyGen(), card_number)
+                encrypted_card_name = encryption(KeyGen(), card_name)
+                encrypted_card_expiry_date = encryption(KeyGen(), card_expiry_date)
+                encrypted_card_CVV = encryption(KeyGen(), card_CVV)
+                print(encrypted_card_number)
+                print(encrypted_card_name)
+                print(encrypted_card_expiry_date)
+                print(encrypted_card_CVV)
 
-            print(card_number)
-            print(card_name)
-            print(card_expiry_date)
-            print(card_CVV)
-            print("``````````````````````````````````")
-            # Encrypt card-related sensitive information
-            encrypted_card_number = encryption(KeyGen(), card_number)
-            encrypted_card_name = encryption(KeyGen(), card_name)
-            encrypted_card_expiry_date = encryption(KeyGen(), card_expiry_date)
-            encrypted_card_CVV = encryption(KeyGen(), card_CVV)
-            print(encrypted_card_number)
-            print(encrypted_card_name)
-            print(encrypted_card_expiry_date)
-            print(encrypted_card_CVV)
-
-            PaymentObject.set_card_number(encrypted_card_number)
-            PaymentObject.set_card_name(encrypted_card_name)
-            PaymentObject.set_card_expiry_date(encrypted_card_expiry_date)
-            PaymentObject.set_card_CVV(encrypted_card_CVV)
+                PaymentObject.set_card_number(encrypted_card_number)
+                PaymentObject.set_card_name(encrypted_card_name)
+                PaymentObject.set_card_expiry_date(encrypted_card_expiry_date)
 
 
         # Open user db
@@ -1293,7 +1360,7 @@ def checkout():
             abort(500)
         users_dict = db["Users"]
 
-        print("Heuy")
+
         current_user_now = users_dict[current_user.get_id()]
         current_user_now.set_payment_info(PaymentObject)
 
@@ -1389,7 +1456,9 @@ def checkout():
         db["Cart"] = cartDicts
         db.close()
 
-        message = current_user.get_email_address()+ ' has successfully ordered'
+        ip_addr = 'IP Address: ' + str(request.remote_addr)
+        os = ', Operating System: ' + str(request.headers.get('User-Agent'))
+        message = current_user.get_email_address(), ' has successfully ordered. ' + ip_addr + os
         logger.info(message)
         return render_template("home.html")
 
@@ -1483,7 +1552,7 @@ def add_to_cart():
             return redirect(url_for("login")), flash("Please login to order!", "warning"), False
 
     current_url = request.referrer
-    source = requests.get(current_url, verify=False).content
+    source = requests.get(current_url).content
     soup = BeautifulSoup(source, "html.parser")
     food_id = soup.find("h4", id="foodid").get_text()
 
@@ -2407,7 +2476,6 @@ def add_package(package_name):
         abort(403)
 
 
-
 @app.route("/policies", methods=["GET", "POST"])
 @login_required
 def policies():
@@ -2435,4 +2503,4 @@ def redirecting_source(website):
 
 if __name__ == "__main__":
     installation_of_packages()
-    app.run(debug=True, host='0.0.0.0',port=7777, ssl_context=('cert.pem', 'key.pem'))
+    app.run(debug=True)
