@@ -19,7 +19,10 @@ class User(UserMixin):
         self.__payment_info = []
 
     def set_payment_info(self,payment_info):
-        return self.__payment_info.append(payment_info)
+        self.__payment_info.append(payment_info)
+
+    def get_payment_info(self):
+        return self.__payment_info
 
     def set_id(self, id):
         self.__id = id

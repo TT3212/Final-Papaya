@@ -1,7 +1,19 @@
 {% extends "base.html" %}
 {% block head %}
-<link rel="stylesheet" href="static/CSS/accounts.css">
-<link rel="stylesheet" href="static/CSS/NavFooter.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
+{% if current_user.is_authenticated %}
+
+    {% if current_user.get_account_type() == "Staff" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/staff.css') }}">
+    {% elif current_user.get_account_type() == "Admin" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
+    {% elif current_user.get_account_type() == "Customer" %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+    {% endif %}
+{% else %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
+{% endif %}
+
 {% endblock %}
 {% block title %}Login{% endblock %}
 {% block content %}

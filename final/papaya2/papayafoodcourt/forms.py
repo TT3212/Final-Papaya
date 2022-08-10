@@ -1,4 +1,4 @@
-from wtforms import StringField, validators, PasswordField, TextAreaField, FileField, SelectField, HiddenField, SubmitField, Form, DecimalField
+from wtforms import StringField, validators, PasswordField, TextAreaField, FileField, SelectField, HiddenField, SubmitField, Form, DecimalField, IntegerField
 from wtforms.fields import EmailField, SearchField
 from wtforms.validators import InputRequired
 from flask_wtf import FlaskForm
@@ -237,3 +237,16 @@ class ReviewsForm(Form):
         'Write your review below:',
         [validators.DataRequired()]
     )
+
+class PaymentForm(FlaskForm):
+    first_name = StringField('First Name', [validators.Length(min=1, max=150), validators.DataRequired()])
+    last_name = StringField('Last Name', [validators.Length(min=1, max=150), validators.DataRequired()])
+    street_address = TextAreaField('Street Address', [validators.optional(), validators.length(min=1, max=150)])
+    building_block = TextAreaField('Building Block', [validators.optional(), validators.length(min=1, max=150)])
+    city = TextAreaField('City', [validators.optional(), validators.length(min=1, max=80)])
+    postal_code = IntegerField('Postal Code', [validators.optional(), validators.length(min=111111, max=999999)])
+    phone_number = IntegerField('Phone Number', [validators.optional(), validators.length(min=00000000, max=99999999)])
+
+    card_no = IntegerField('Phone Number', [validators.optional(), validators.length(min=0000000000000000, max=9999999999999999)])
+    name_on_card = StringField('Name On Card', [validators.Length(min=1, max=150), validators.DataRequired()])
+    CVV = IntegerField('Postal Code', [validators.optional(), validators.length(min=111111, max=999999)])

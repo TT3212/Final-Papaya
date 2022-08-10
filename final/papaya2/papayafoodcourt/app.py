@@ -60,7 +60,7 @@ import secure
 from hashing import hash_SHA512, history
 from monitoring import updated_lib, update_module, outdated_lib, freeze_check, adding_package, sorting
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='Templates')
 bcrypt = Bcrypt(app)
 app.config["SECRET_KEY"] = "test-secret-key"
 app.config['RECAPTCHA_SITE_KEY']= '6LefYcwgAAAAABZjijwkQ08oTBH2Q7WH9MN1nKIA'
@@ -150,7 +150,7 @@ def save_picture(form, directory, size):
 
 @app.after_request
 def add_security_headers(resp):
-    resp.headers['Content-Security-Policy']='default-src \'self\''
+    resp.headers['Content-Security-Policy']=False
     return resp
 
 
@@ -1339,7 +1339,7 @@ def checkout():
             print(encrypted_card_number)
             print(encrypted_card_name)
             print(encrypted_card_expiry_date)
-            print(encrypted_card_CVV)
+
 
             PaymentObject.set_card_number(encrypted_card_number)
             PaymentObject.set_card_name(encrypted_card_name)
@@ -1418,6 +1418,8 @@ def checkout():
             )
 
         db["History"] = orderHistoryDict
+
+        print("Hjj0")
         print(orderHistoryDict[current_user.get_id()].OrderHistory)
         orderHistoryDict = db["History"]
 
@@ -1425,6 +1427,7 @@ def checkout():
 
         # Check if Payment Object is existed:
         if current_user.get_id() not in cartDict:
+            print("Hi1")
             cart = Cart()
             cartDict[current_user.get_id()].payment_info.clear()
             cartDict[current_user.get_id()].payment_info.append(PaymentObject)
@@ -1547,7 +1550,7 @@ def add_to_cart():
             return redirect(url_for("login")), flash("Please login to order!", "warning"), False
 
     current_url = request.referrer
-    source = requests.get(current_url).content
+    source = requests.get(current_url, verify=False).content
     soup = BeautifulSoup(source, "html.parser")
     food_id = soup.find("h4", id="foodid").get_text()
 
@@ -2498,4 +2501,4 @@ def redirecting_source(website):
 
 if __name__ == "__main__":
     installation_of_packages()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port='7777', ssl_context=('cert.pem','key.pem'))
