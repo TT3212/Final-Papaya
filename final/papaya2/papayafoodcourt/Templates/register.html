@@ -1,18 +1,7 @@
 {% extends "base.html" %}
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='CSS/NavFooter.css') }}">
-{% if current_user.is_authenticated %}
-
-    {% if current_user.get_account_type() == "Staff" %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/staff.css') }}">
-    {% elif current_user.get_account_type() == "Admin" %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/admin.css') }}">
-    {% elif current_user.get_account_type() == "Customer" %}
-            <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
-    {% endif %}
-{% else %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/customer.css') }}">
-{% endif %}
+<link rel="stylesheet" href="static/CSS/accounts.css">
+<link rel="stylesheet" href="static/CSS/NavFooter.css">
 {% endblock %}
 {% block title %}Register{% endblock %}
 {% block content %}
@@ -48,13 +37,13 @@
                         <span class="text-danger">{{ error }}</span>
                   {% endfor %}
                 <br>
-                <small>A secure password should contains:
+                <small>A secure password should contain:
                     <ul>
-                        <li>At least 8 characters</li>
+                        <li>At least 8 characters long</li>
                         <li>At least one uppercase</li>
                         <li>At least one lowercase</li>
                         <li>At least one number</li>
-                        <li>At least one special character, e.g. #@!</li>
+                        <li>Not more than 2 consecutive identical characters</li>
                     </ul>
                 </small>
             </div>
