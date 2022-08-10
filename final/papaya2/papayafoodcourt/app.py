@@ -16,8 +16,7 @@ from forms import (
     StoreForm,
     ReviewsForm,
     SearchLogs,
-    MonitorFilter,
-    PaymentForm
+    MonitorFilter
 )
 import shelve
 from User import User
@@ -1300,52 +1299,51 @@ def checkout():
 
         # Create a Payment Object
         PaymentObject = Payment()
-        payment_form = PaymentForm(request.form)
-        if payment_form.validate_on_submit():
-            if request.method == "POST":
-                first_name = request.form.get("FirstName")
-                last_name = request.form.get("LastName")
-                street_address = request.form.get("StreetAddress")
-                building_block = request.form.get("BuildingBlock")
-                city = request.form.get("City")
-                postal_code = request.form.get("PostalCode")
-                phone_number = request.form.get("PhoneNumber")
-                bill_info = request.form.get("BillInfo")
 
-                # Update collected infomation
-                PaymentObject.set_first_name(first_name)
-                PaymentObject.set_last_name(last_name)
-                PaymentObject.set_street_address(street_address)
-                PaymentObject.set_building_block(building_block)
-                PaymentObject.set_city(city)
-                PaymentObject.set_postal_code(postal_code)
-                PaymentObject.set_phone_number(phone_number)
-                PaymentObject.set_bill_info(bill_info)
+        if request.method == "POST":
+            first_name = request.form.get("FirstName")
+            last_name = request.form.get("LastName")
+            street_address = request.form.get("StreetAddress")
+            building_block = request.form.get("BuildingBlock")
+            city = request.form.get("City")
+            postal_code = request.form.get("PostalCode")
+            phone_number = request.form.get("PhoneNumber")
+            bill_info = request.form.get("BillInfo")
 
-                # Payment Detail
-                card_number = request.form.get("cardNo")
-                card_name = request.form.get("cardName")
-                card_expiry_date = request.form.get("cardExpiryDate")
-                card_CVV = request.form.get("CVV")
+            # Update collected infomation
+            PaymentObject.set_first_name(first_name)
+            PaymentObject.set_last_name(last_name)
+            PaymentObject.set_street_address(street_address)
+            PaymentObject.set_building_block(building_block)
+            PaymentObject.set_city(city)
+            PaymentObject.set_postal_code(postal_code)
+            PaymentObject.set_phone_number(phone_number)
+            PaymentObject.set_bill_info(bill_info)
 
-                print(card_number)
-                print(card_name)
-                print(card_expiry_date)
-                print(card_CVV)
-                print("``````````````````````````````````")
-                # Encrypt card-related sensitive information
-                encrypted_card_number = encryption(KeyGen(), card_number)
-                encrypted_card_name = encryption(KeyGen(), card_name)
-                encrypted_card_expiry_date = encryption(KeyGen(), card_expiry_date)
-                encrypted_card_CVV = encryption(KeyGen(), card_CVV)
-                print(encrypted_card_number)
-                print(encrypted_card_name)
-                print(encrypted_card_expiry_date)
-                print(encrypted_card_CVV)
+            # Payment Detail
+            card_number = request.form.get("cardNo")
+            card_name = request.form.get("cardName")
+            card_expiry_date = request.form.get("cardExpiryDate")
+            card_CVV = request.form.get("CVV")
 
-                PaymentObject.set_card_number(encrypted_card_number)
-                PaymentObject.set_card_name(encrypted_card_name)
-                PaymentObject.set_card_expiry_date(encrypted_card_expiry_date)
+            print(card_number)
+            print(card_name)
+            print(card_expiry_date)
+            print(card_CVV)
+            print("``````````````````````````````````")
+            # Encrypt card-related sensitive information
+            encrypted_card_number = encryption(KeyGen(), card_number)
+            encrypted_card_name = encryption(KeyGen(), card_name)
+            encrypted_card_expiry_date = encryption(KeyGen(), card_expiry_date)
+            encrypted_card_CVV = encryption(KeyGen(), card_CVV)
+            print(encrypted_card_number)
+            print(encrypted_card_name)
+            print(encrypted_card_expiry_date)
+            print(encrypted_card_CVV)
+
+            PaymentObject.set_card_number(encrypted_card_number)
+            PaymentObject.set_card_name(encrypted_card_name)
+            PaymentObject.set_card_expiry_date(encrypted_card_expiry_date)
 
 
         # Open user db
@@ -1420,8 +1418,6 @@ def checkout():
             )
 
         db["History"] = orderHistoryDict
-
-        print("Hjj0")
         print(orderHistoryDict[current_user.get_id()].OrderHistory)
         orderHistoryDict = db["History"]
 
@@ -1429,7 +1425,6 @@ def checkout():
 
         # Check if Payment Object is existed:
         if current_user.get_id() not in cartDict:
-            print("Hi1")
             cart = Cart()
             cartDict[current_user.get_id()].payment_info.clear()
             cartDict[current_user.get_id()].payment_info.append(PaymentObject)
