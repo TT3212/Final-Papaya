@@ -6,7 +6,7 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-    <h4>We are current redirecting you to another website...</h4>
+    <h4>We are current redirecting you to another website... -> {{website_name}}</h4>
     <a href="{{ website }}" class="btn btn-info">Confirm</a>
     <a href="{{ url_for('home') }}" class="btn btn-info">Back To Home</a>
 </div>
