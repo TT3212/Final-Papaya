@@ -241,6 +241,43 @@ def home():
         abort(500)
     stores_list = len([stores for stores in stores_dict.values()])
     db.close()
+    
+    if current_user.get_account_type() == "Admin":
+        admin_logout = []
+        db = shelve.open("admin_logout.db","w")
+        try:
+            if "admin" in db:
+                admin_logout = db["admin"]
+            else:
+                db["admin"] = admin_logout
+        except:
+            abort(500)
+        d = datetime.strptime(admin_logout[-1], "%Y-%m-%d - %H:%M:%S").strftime("%Y-%m-%d - %H:%M:%S")
+        logs = open("myapp.log", "r")
+        logging = logs.read()
+        log_content = logging.split(',') and logging.split('\n')
+        logging_list = []
+        update_list = []
+        info_list =[]
+        warning_list = []
+        for values in log_content:
+            if len(values) != 0:
+                logging_list.append(values.split(','))
+        for i in range(len(logging_list)):
+            record_time = datetime.strptime(logging_list[i][1], " %Y-%m-%d - %H:%M:%S ").strftime("%Y-%m-%d - %H:%M:%S")
+            if record_time > d:
+                if logging_list[i][0] == " INFO ":
+                    info_list.append(logging_list[i])
+                elif logging_list[i][0] == " WARNING ":
+                    warning_list.append(logging_list[i])
+                update_list.append(logging_list[i])
+        info_count = (len(info_list))
+        warning_count = (len(warning_list))
+        admin_logout.clear()
+        db["admin"] = admin_logout
+        db.close
+        message = "There has been " + str(info_count) + " information logs and " + str(warning_count) + " warning logs since your  last logged in"
+        flash(message,"info")  
     return render_template("home.html", no_of_orders=no_of_orders, users_list = users_list, stores_list = stores_list)
 
 
@@ -417,11 +454,11 @@ def login_2fa():
                     edited_user_p.remove(login.user.get_email_address())
                     edit_pw["users"] = edited_user_p
                     return redirect(url_for("admin_reset_password")), flash("Please change your password!", "warning")
-            return redirect(url_for("home"))
             ip_addr = 'IP Address: ' + str(request.remote_addr)
             os = ', Operating System: ' + str(request.headers.get('User-Agent'))
             message = login.user.get_email_address() + ' successfully signed in. ' + ip_addr + os
             logger.warning(message)
+            return redirect(url_for("home"))
         elif entered_otp is not None:
             ip_addr = 'IP Address: ' + str(request.remote_addr)
             os = ', Operating System: ' + str(request.headers.get('User-Agent'))
@@ -486,6 +523,20 @@ def register():
 @app.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
+    if current_user.get_account_type() == "Admin":
+        admin_logout = []
+        db = shelve.open("admin_logout.db","c")
+        try:
+            if "admin" in db:
+                admin_logout = db["admin"]
+            else:
+                db["admin"] = admin_logout
+        except:
+            abort(500)
+        current_now = datetime.now().strftime("%Y-%m-%d - %H:%M:%S")
+        admin_logout.append(current_now)
+        db["admin"]= admin_logout
+        db.close    
     logout_user()
     flash("You have been logged out.", "info")
     return redirect(url_for("login"))
