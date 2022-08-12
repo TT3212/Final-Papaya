@@ -241,43 +241,44 @@ def home():
         abort(500)
     stores_list = len([stores for stores in stores_dict.values()])
     db.close()
-    
-    if current_user.get_account_type() == "Admin":
-        admin_logout = []
-        db = shelve.open("admin_logout.db","w")
-        try:
-            if "admin" in db:
-                admin_logout = db["admin"]
-            else:
+    if current_user.is_authenticated:
+        if current_user.get_account_type() == "Admin":
+            admin_logout = []
+            db = shelve.open("admin_logout.db","w")
+            try:
+                if "admin" in db:
+                    admin_logout = db["admin"]
+                else:
+                    db["admin"] = admin_logout
+            except:
+                abort(500)
+            if len(admin_logout) != 0:
+                d = datetime.strptime(admin_logout[0], "%Y-%m-%d - %H:%M:%S").strftime("%Y-%m-%d - %H:%M:%S")
+                logs = open("myapp.log", "r")
+                logging = logs.read()
+                log_content = logging.split(',') and logging.split('\n')
+                logging_list = []
+                update_list = []
+                info_list =[]
+                warning_list = []
+                for values in log_content:
+                    if len(values) != 0:
+                        logging_list.append(values.split(','))
+                for i in range(len(logging_list)):
+                    record_time = datetime.strptime(logging_list[i][1], " %Y-%m-%d - %H:%M:%S ").strftime("%Y-%m-%d - %H:%M:%S")
+                    if record_time > d:
+                        if logging_list[i][0] == " INFO ":
+                            info_list.append(logging_list[i])
+                        elif logging_list[i][0] == " WARNING ":
+                            warning_list.append(logging_list[i])
+                        update_list.append(logging_list[i])
+                info_count = (len(info_list))
+                warning_count = (len(warning_list))
+                admin_logout.clear()
                 db["admin"] = admin_logout
-        except:
-            abort(500)
-        d = datetime.strptime(admin_logout[-1], "%Y-%m-%d - %H:%M:%S").strftime("%Y-%m-%d - %H:%M:%S")
-        logs = open("myapp.log", "r")
-        logging = logs.read()
-        log_content = logging.split(',') and logging.split('\n')
-        logging_list = []
-        update_list = []
-        info_list =[]
-        warning_list = []
-        for values in log_content:
-            if len(values) != 0:
-                logging_list.append(values.split(','))
-        for i in range(len(logging_list)):
-            record_time = datetime.strptime(logging_list[i][1], " %Y-%m-%d - %H:%M:%S ").strftime("%Y-%m-%d - %H:%M:%S")
-            if record_time > d:
-                if logging_list[i][0] == " INFO ":
-                    info_list.append(logging_list[i])
-                elif logging_list[i][0] == " WARNING ":
-                    warning_list.append(logging_list[i])
-                update_list.append(logging_list[i])
-        info_count = (len(info_list))
-        warning_count = (len(warning_list))
-        admin_logout.clear()
-        db["admin"] = admin_logout
-        db.close
-        message = "There has been " + str(info_count) + " information logs and " + str(warning_count) + " warning logs since your  last logged in"
-        flash(message,"info")  
+                db.close
+                message = "There has been " + str(info_count) + " information logs and " + str(warning_count) + " warning logs since your  last logged in"
+                flash(message,"info")
     return render_template("home.html", no_of_orders=no_of_orders, users_list = users_list, stores_list = stores_list)
 
 
