@@ -245,7 +245,7 @@ def home():
         if current_user.get_account_type() == "Admin":
             admin_logout = []
             try:
-                db = shelve.open("admin_logout.db","w")
+                db = shelve.open("admins_logout.db","w")
                 if "admin" in db:
                     admin_logout = db["admin"]
                 else:
@@ -283,6 +283,7 @@ def home():
                         db.close
                         message = "There has been " + str(info_count) + " information logs and " + str(warning_count) + " warning logs since your  last logged in"
                         flash(message,"info")
+                        break
     return render_template("home.html", no_of_orders=no_of_orders, users_list = users_list, stores_list = stores_list)
 
 
@@ -530,7 +531,7 @@ def register():
 def logout():
     if current_user.get_account_type() == "Admin":
         admin_logout = []
-        db = shelve.open("admin_logout.db","c")
+        db = shelve.open("admins_logout.db","c")
         try:
             if "admin" in db:
                 admin_logout = db["admin"]
