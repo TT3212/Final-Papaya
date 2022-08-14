@@ -1964,7 +1964,7 @@ def create_store():
             db["Stores"] = stores_dict
             db.close()
             flash("Store created!", "success")
-
+            return redirect(url_for("create_product"))
         return render_template("create-store.html", form=create_store_form)
     else:
         abort(403)

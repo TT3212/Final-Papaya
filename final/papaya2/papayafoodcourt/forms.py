@@ -26,7 +26,7 @@ def validate_password(form, field):
     # if not any(char in special_char for char in field.data):
     #     raise validators.ValidationError('Password must contain at least one special character.')
     for i in field.data:
-        i = i.upper()
+        i = str(i).upper()
         if j != '':
             if i == j:
                 count += 1
